@@ -1,0 +1,37 @@
+# setup.py
+build
+dist
+*.egg*
+
+# Python
+*.pyc
+*.pyo
+
+# IDEs
+.idea
+
+# MACOSX
+.DS_Store
+
+
+# Other
+.tox
+.coverage
+.pypirc
+.ipynb_checkpoints/
+*.ipynb
+*~
+.html/
+.mypy_cache/
+
+#eclipse files
+.pydevproject
+.project
+
+logs/
+data/
+datasets/
+smac3-output*
+
+ks/
+
