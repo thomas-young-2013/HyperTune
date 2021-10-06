@@ -1,293 +1,181 @@
-<meta name="robots" content="noindex">
+<p align="center">
+<img src="docs/imgs/logo.jpg" width="40%">
+</p>
 
-# Hyper-Tune
+-----------
 
-**Hyper-Tune: an Efficient Hyper-parameter Tuning at Scale**
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/thomas-young-2013/HyperTune/blob/master/LICENSE)
+[![Build Status](https://api.travis-ci.org/thomas-young-2013/open-box.svg?branch=master)](https://api.travis-ci.org/thomas-young-2013)
+[![Issues](https://img.shields.io/github/issues-raw/thomas-young-2013/HyperTune.svg)](https://github.com/thomas-young-2013/HyperTune/issues?q=is%3Aissue+is%3Aopen)
+[![Bugs](https://img.shields.io/github/issues/thomas-young-2013/HyperTune/bug.svg)](https://github.com/thomas-young-2013/HyperTune/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Pull Requests](https://img.shields.io/github/issues-pr-raw/thomas-young-2013/HyperTune.svg)](https://github.com/thomas-young-2013/HyperTune/pulls?q=is%3Apr+is%3Aopen)
+[![Version](https://img.shields.io/github/release/thomas-young-2013/HyperTune.svg)](https://github.com/thomas-young-2013/HyperTune/releases)
+[![Join the chat at https://gitter.im/bbo-open-box](https://badges.gitter.im/HyperTune.svg)](https://gitter.im/HyperTune?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Documentation Status](https://readthedocs.org/projects/HyperTune/badge/?version=latest)](https://HyperTune.readthedocs.io/en/latest/?badge=latest)
 
-## Experimental Environment Installation
-
-Note that in our experiments, the operating system is Ubuntu 18.04.3 LTS.
-We use **xgboost==1.3.1** and **torch==1.7.1** (torchvision==0.7.0, CUDA Version 10.1.243).
-The configuration space is defined using **ConfigSpace==0.4.18**.
-The multi-fidelity surrogate in our method is implemented based on probabilistic random forest in [SMAC3](https://github.com/automl/SMAC3),
-which depends on **pyrfr==0.8.0**. (included in requirements.txt)
-
-In our paper, we use Pytorch to train neural networks on 32 RTX 2080Ti GPUs,
-and the experiments are conducted on ten machines with 640 AMD EPYC 7702P CPU cores in total (64 cores, 128 threads each).
-
-1. preparations: Python == 3.7
-2. install SWIG:
-    ```
-    apt-get install swig3.0
-    ln -s /usr/bin/swig3.0 /usr/bin/swig
-    ```
-3. install requirements:
-    ```
-    cat requirements.txt | xargs -n 1 -L 1 pip install
-    ```
-
-## Data Preparation
-
-### XGBoost
-
-+ Download 4 datasets (Covertype, Pokerhand, Hepmass, Higgs) for XGBoost tuning experiments:
-  + https://archive.ics.uci.edu/ml/datasets/Covertype
-  + https://archive.ics.uci.edu/ml/datasets/Poker+Hand
-  + https://archive.ics.uci.edu/ml/datasets/HEPMASS
-  + https://archive.ics.uci.edu/ml/datasets/HIGGS
-+ Preprocess data (including train-test split) with `test/preprocess_data.py`.
-+ Put datasets (`.npy` files) under `./datasets/`.
-
-### NAS-Bench-201
-
-+ Follow the instructions of <https://github.com/D-X-Y/NAS-Bench-201>
-and download benchmark file of NAS-Bench-201(`NAS-Bench-201-v1_1-096897.pth`).
-
-### ResNet
-
-+ Download `cifar10.zip`(preprocessed) from [Google Drive](https://drive.google.com/file/d/1TVY0nXLHsjqPUXm8TmkOv9qcaRX7mQHH)
-or [Baidu-Wangpan (code:t47a)](https://pan.baidu.com/s/1Ie_CKtJaJjddY0oA6I6Sng).
-(Note that at present, we only provide downloading from Baidu-Wangpan because Google Drive is not an anonymous service.)
-+ Unzip `cifar10.zip` and put it under `./datasets/img_datasets/` (the path should be `./datasets/img_datasets/cifar10/`).
-
-### LSTM
-
-+ We implement LSTM based on <https://github.com/salesforce/awd-lstm-lm> to conduct our experiments.
-Please follow the instructions in project readme and use `getdata.sh` to to acquire the Penn Treebank dataset.
-+ Put dataset (`.txt` files) under `./test/awd_lstm_lm/data/penn/`
+## HyperTune: an Efficient Blackbox Optimization System at Scale
+**HyperTune** is an scalable and efficient system for distributed blackbox optimization, particularly hyper-parameter tuning. It is designed and developed by the AutoML team from the <a href="http://net.pku.edu.cn/~cuibin/" target="_blank" rel="nofollow">DAIR Lab</a> at Peking University. The designing goal is to make blackbox optimization easier to be applied in both academia and industry, and help facilitate data science.
 
 
-# Documentations
+## Links
++ Documentations: [to appear soon]()
++ Examples: [to appear soon]()
++ Conda package: [to appear soon]()
++ Blog post: [to appear soon]()
 
-## Project Code Overview
 
-+ `tuner/` : the implemented method and compared baselines.
-+ `test/` : the python scripts in the experiments, and useful tools.
+## HyperTune Framework in a Glance
+<p align="center">
+<img src="docs/imgs/framework.png" width="60%">
+</p>
 
-## Experiments Design
+HyperTune contains the following three functionality components:
++ **Resource Allocator**: The resource allocator aims to find the optimal bracket (i.e., initial resource) for new configurations that minimizes the evaluation costs while keeping a high precision.
++ **Evaluation Scheduler**: The evaluation scheduler determines which configuration to promote (i.e., evaluate with larger resources) to ensure fast convergence and high sample efficiency.
++ **Multi-fidelity Optimizer**: The multi-fidelity optimizer suggests the next configuration to evaluate based on the results of previous partial evaluations.
 
-See `tuner/__init__.py` to get the name of each baseline method. (Keys of `mth_dict`)
+For more details of HyperTune, please refer to our paper [to appear soon]().
+## Installation
 
-Compared methods are listed as follows:
+### System Requirements
 
-| Method | String of `${method_name}`|
-| --- | --- |
-| Batch BO | `bo` |
-| Successive Halving | `sh` |
-| Hyperband | `hyperband` |
-| BOHB | `bohb` |
-| MFES-HB | `mfeshb` |
-| A-Random | `arandom` |
-| A-BO | `abo` |
-| A-REA | `area` |
-| ASHA | `asha` |
-| A-BOHB | `abohb_aws` (see the <font color=#FF0000>**Note**</font> below) |
-| A-Hyperband | `ahyperband` |
-| ours | `tuner` |
+Installation Requirements:
++ Python >= 3.6 (Python 3.7 is recommended!)
 
-<font color=#FF0000>**Note**</font>: To run A-BOHB(`abohb_aws`) implemented in **Autogluon**(<https://github.com/awslabs/autogluon>),
-please install the corresponding environment and follow the instructions at the last of this document.
+Supported Systems:
++ Linux (Ubuntu, ...)
++ macOS
++ Windows
 
-### Exp.1: Compare methods on Nas-Bench-201
-
-Exp settings:
-+ n_workers=8, rep=10.
-+ `cifar10-valid`: runtime_limit=86400
-+ `cifar100`: runtime_limit=172800
-+ `ImageNet16-120`: runtime_limit=432000
-
-Compared methods: `bo`, `sh`, `hyperband`, `bohb`, `mfeshb`, `arandom`, `area`, `abo`, `asha`, `ahyperband`, `abohb_aws`(See the last of this document), `tuner`
-
-To conduct the simulation experiment shown in Figure 5, the script is as follows.
-Please specify `${dataset_name}`, `${runtime_limit}`, `${method_name}`:
-
-```
-python test/nas_benchmarks/benchmark_nasbench201.py --data_path './NAS-Bench-201-v1_1-096897.pth' --dataset ${dataset_name} --runtime_limit ${runtime_limit} --mths ${method_name} --R 27 --n_workers 8 --rep 10
+We **strongly** suggest you to create a Python environment via [Anaconda](https://www.anaconda.com/products/individual#Downloads):
+```bash
+conda create -n hypertune3.7 python=3.7
+conda activate hypertune3.7
 ```
 
-### Exp.2: Compare methods on XGBoost
-
-Exp settings:
-+ n_workers=8, rep=10.
-+ `covtype`(Covertype): runtime_limit=10800
-+ `pokerhand`(Pokerhand): runtime_limit=7200
-+ `hepmass`(Hepmass): runtime_limit=43200
-+ `HIGGS`(Higgs): runtime_limit=43200
-
-Compared methods: `bo`, `sh`, `hyperband`, `bohb`, `mfeshb`, `arandom`, `abo`, `asha`, `ahyperband`, `abohb_aws`(See the last of this document), `tuner`
-
-To conduct the experiment shown in Figure 7, the script is as follows.
-Please specify `${dataset_name}`, `${runtime_limit}`, `${method_name}`:
-
-```
-python test/benchmark_xgb.py --datasets ${dataset_name} --runtime_limit ${runtime_limit} --mth ${method_name} --R 27 --n_workers 8 --rep 10
+Then update your `pip` and `setuptools` as follows:
+```bash
+pip install pip setuptools --upgrade
 ```
 
-Please make sure there are enough CPUs on the machine.
+### Manual Installation from Source
 
-### Exp.3: Compare methods on LSTM and ResNet
+To install the newest HyperTune package, just type the following scripts on the command line:
 
-Exp settings:
-+ n_workers=4, rep=10.
-+ `penn`(Penn Treebank for LSTM): runtime_limit=172800
-+ `cifar10`(for ResNet): runtime_limit=172800
-
-Compared methods: `sh`, `hyperband`, `bohb`, `mfeshb`, `asha`, `ahyperband`, `abohb_aws`(See the last of this document), `tuner`
-
-To conduct the experiment shown in Figure 6(a), the script is as follows:
-```
-python test/awd_lstm_lm/benchmark_lstm.py --dataset penn --runtime_limit ${runtime_limit} --mth ${method_name} --R 27 --n_workers 4 --rep 10
+```bash
+git clone https://github.com/thomas-young-2013/HyperTune.git && cd HyperTune
+cat requirements/main.txt | xargs -n 1 -L 1 pip install
+python setup.py install --user
 ```
 
-To conduct the experiment shown in Figure 6(b), the script is as follows:
-```
-python test/resnet/benchmark_resnet.py --dataset cifar10 --runtime_limit ${runtime_limit} --mth ${method_name} --R 27 --n_workers 4 --rep 10
-```
+For more details about installation instructions, please refer to the Installation Guide Document [To appear soon]().
 
-Please specify `${runtime_limit}`, `${method_name}`.
+## Quick Start
 
-### Exp.4: Test robustness of partial evaluations on noised Hartmann
+A quick start example is as follows:
 
-Exp settings:
-+ n_workers=8, rep=10.
-+ `hartmann`(noised math function): runtime_limit=1080
-+ `noise_alpha`: 0, 100, 10000 (corresponding to 0, 40, 4000 in our paper)
+First, define a configuration space and objective function. The objective function which takes an configuration and the resource ratio as inputs.
+Here, we take the counting-one problem as an example.
 
-Compared methods: `asha`(with different initial resource), `abohb_aws`(See the last of this document), `tuner`
+```python
+import numpy as np
+from ConfigSpace import ConfigurationSpace, CategoricalHyperparameter, UniformFloatHyperparameter
+n_cat = 32
+n_cont = 32
+cs = ConfigurationSpace()
+for i in range(n_cat):
+    var_cat = CategoricalHyperparameter("cat%d" % i, choices=[0, 1])
+    cs.add_hyperparameter(var_cat)
+for i in range(n_cont):
+    var_cont = UniformFloatHyperparameter("cont%d" % i, 0, 1)
+    cs.add_hyperparameter(var_cont)
 
-To conduct the simulation experiment shown in Figure 8, the script are as follows.
-Please specify `${noise_alpha}`:
+def objective_function(config, resource_ratio):
+    max_samples = 729
+    rng = np.random.RandomState(42)
+    x_cat = [config['cat%d' % i] for i in range(n_cat)]
+    x_cont = [config['cont%d' % i] for i in range(n_cont)]
 
-+ run `asha` with different initial resource (e.g. `--R 9` means the initial resource is 1/9):
-```
-python test/math_benchmarks/benchmark_math.py --dataset hartmann --noise_alpha ${noise_alpha} --runtime_limit 1080 --mths asha --R 1 --n_workers 8 --rep 10
-python test/math_benchmarks/benchmark_math.py --dataset hartmann --noise_alpha ${noise_alpha} --runtime_limit 1080 --mths asha --R 3 --n_workers 8 --rep 10
-python test/math_benchmarks/benchmark_math.py --dataset hartmann --noise_alpha ${noise_alpha} --runtime_limit 1080 --mths asha --R 9 --n_workers 8 --rep 10
-python test/math_benchmarks/benchmark_math.py --dataset hartmann --noise_alpha ${noise_alpha} --runtime_limit 1080 --mths asha --R 27 --n_workers 8 --rep 10
-```
-
-+ run `tuner`:
-```
-python test/math_benchmarks/benchmark_math.py --dataset hartmann --noise_alpha ${noise_alpha} --runtime_limit 1080 --mths tuner --R 27 --n_workers 8 --rep 10
-```
-
-### Exp.5: Test scalability on workers
-
-Exp settings:
-+ rep=10.
-+ `n_workers`: 1, 2, 4, 8, 16, 32, 64. (128, 256 for Counting Ones)
-
-Compared method: `tuner`(with different n_workers)
-
-To conduct the experiment shown in Figure 10, the script are as follows.
-Please specify `${n_workers}`:
-
-+ Nas-Bench-201 on cifar100: runtime_limit=172800
-```
-python test/nas_benchmarks/benchmark_nasbench201.py --data_path './NAS-Bench-201-v1_1-096897.pth' --dataset cifar100 --runtime_limit 172800 --mths tuner --R 27 --n_workers ${n_workers} --rep 10
+    result = -np.sum(x_cat)
+    # draw samples to approximate the expectation (Bernoulli distribution)
+    n_samples = int(max_samples * resource_ratio)
+    for x in x_cont:
+        result -= rng.binomial(n_samples, p=x) / n_samples
+    return result # The lower, the better
 ```
 
-+ Counting Ones function on 32+32 dimensions: runtime_limit=5400
-```
-python test/math_benchmarks/benchmark_math.py --dataset counting-32-32 --runtime_limit 5400 --mths tuner --noise 0 --R 27 --n_workers ${n_workers} --rep 10
+Then, start a master to suggest configurations:
+
+```python
+from tuner.async_mq_mfes import async_mqMFES
+master_ip = 'xxx.xxx.xxx.xxx'
+master_port = 'xx'
+authkey = 'xxx'
+master = async_mqMFES(
+    objective_function, cs, R=81, random_state=1,
+    restart_needed=True, runtime_limit=300,
+    ip=master_ip, port=master_port, authkey=authkey,
+)
+master.run()
 ```
 
-+ XGBoost on Covertype: runtime_limit=10800
-```
-python test/benchmark_xgb.py --datasets covtype --runtime_limit 10800 --mth tuner --R 27 --n_workers ${n_workers} --rep 10
+Finally, start workers to evaluate configurations from the master:
+
+```python
+from tuner.async_mq_mf_worker import async_mqmfWorker as Worker
+worker = Worker(objective_function, master_ip, master_port, authkey=authkey)
+worker.run()
 ```
 
-<font color=#FF0000>**Note**</font>: if you do not have enough CPUs on one machine to run the experiment with n_workers=16 (which requires 16*16 CPUs),
-you can run on multiple machines by the following commands:
+**More Examples**:
++ [To appear soon]()
 
-+ First, start the master node with some local workers (e.g. 8 local workers, need 16 workers in total).
-```
-python test/benchmark_xgb.py --n_jobs 16 --datasets covtype --runtime_limit 10800 --mth tuner --R 27 --n_workers 16 --max_local_workers 8 --port 13579 --rep 1 --start_id 0
-```
+## **Enterprise Users**
+<p align="left">
+<img src="docs/imgs/logo_kuaishou.png" width="35%">
+</p>
 
-+ Then, start the worker nodes with more workers (e.g. 1 worker node with 8 workers). Please specify IP and port of master node.
-```
-python test/benchmark_xgb_worker.py --n_jobs 16 --parallel async --dataset covtype --R 27 --n_workers 8 --ip ${master_ip} --port 13579
-```
+* [Kuaishou Technology](https://www.kuaishou.com/en)
 
-+ In this example, experiment is conducted only once. Please specify `--start_id` to run experiment multiple times with different random seeds.
+## **Releases and Contributing**
+HyperTune has a frequent release cycle. Please let us know if you encounter a bug by [filling an issue](https://github.com/thomas-young-2013/HyperTune/issues/new/choose).
 
-### Exp.6: Ablation study
+We appreciate all contributions. If you are planning to contribute any bug-fixes, please do so without further discussions.
 
-In ablation study, the compared experimental methods are as follows:
+If you plan to contribute new features, new modules, etc. please first open an issue or reuse an existing issue, and discuss the feature with us.
 
-| Method | String of `${method_name}`|
-| --- | --- |
-| A-Hyperband with bracket selection | `ahyperband_bs` |
-| A-BOHB*(our implementation) | `abohb` |
-| A-BOHB* with bracket selection | `abohb_bs` |
-| ours without bracket selection | `tuner_exp1` |
-| delayed ASHA | `asha_delayed` |
-| A-Hyperband with delayed ASHA | `ahyperband_delayed` |
-| ours with original ASHA | `tuner_exp2` |
+To learn more about making a contribution to HyperTune, please refer to our [How-to contribution page](https://github.com/thomas-young-2013/HyperTune/blob/master/CONTRIBUTING.md). 
 
-To conduct the simulation experiment shown in Figure 9(a), the script are as follows.
-```
-python test/nas_benchmarks/benchmark_nasbench201.py --data_path './NAS-Bench-201-v1_1-096897.pth' --dataset cifar10-valid --runtime_limit 86400 --mths ahyperband,ahyperband_bs,abohb,abohb_bs,tuner_exp1,tuner --R 27 --n_workers 8 --rep 10
-```
+We appreciate all contributions and thank all the contributors!
 
-To conduct the simulation experiment shown in Figure 9(b), the script are as follows.
-```
-python test/nas_benchmarks/benchmark_nasbench201.py --data_path './NAS-Bench-201-v1_1-096897.pth' --dataset ImageNet16-120 --runtime_limit 432000 --mths ahyperband,ahyperband_bs,abohb,abohb_bs,tuner_exp1,tuner --R 27 --n_workers 8 --rep 10
-```
 
-To conduct the experiment shown in Figure 9(c), the script are as follows.
-```
-python test/benchmark_xgb.py --datasets covtype --runtime_limit 10800 --mth asha --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets covtype --runtime_limit 10800 --mth asha_delayed --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets covtype --runtime_limit 10800 --mth ahyperband --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets covtype --runtime_limit 10800 --mth ahyperband_delayed --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets covtype --runtime_limit 10800 --mth tuner_exp2 --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets covtype --runtime_limit 10800 --mth tuner --R 27 --n_workers 8 --rep 10
-```
+## **Feedback**
+* [File an issue](https://github.com/thomas-young-2013/HyperTune/issues) on GitHub.
+* Email us via *liyang.cs@pku.edu.cn*.
 
-To conduct the experiment shown in Figure 9(d), the script are as follows.
-```
-python test/benchmark_xgb.py --datasets pokerhand --runtime_limit 7200 --mth asha --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets pokerhand --runtime_limit 7200 --mth asha_delayed --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets pokerhand --runtime_limit 7200 --mth ahyperband --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets pokerhand --runtime_limit 7200 --mth ahyperband_delayed --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets pokerhand --runtime_limit 7200 --mth tuner_exp2 --R 27 --n_workers 8 --rep 10
-python test/benchmark_xgb.py --datasets pokerhand --runtime_limit 7200 --mth tuner --R 27 --n_workers 8 --rep 10
-```
 
-### Special instruction: run A-BOHB with Autogluon
+## Related Projects
 
-To run the baseline method A-BOHB(`abohb_aws`) in the experiments, please install **Autogluon**(<https://github.com/awslabs/autogluon>).
-And we provide scripts in `test/autogluon_abohb/`. Usages are as follows.
+Targeting at openness and advancing AutoML ecosystems, we had also released few other open source projects.
 
-<font color=#FF0000>**Note**</font>: **Autogluon** uses `--num_cpus` and `--num_gpus` to infer number of workers. `--n_workers` is just for method naming.
-Please set appropriate `--num_cpus` and `--num_gpus` according to your machine to limit the number of workers.
+* [MindWare](https://github.com/PKU-DAIR/mindware): an open source system that provides end-to-end ML model training and inference capabilities.
 
-<font color=#FF0000>**Note**</font>: Please specify `--start_id` to run experiment multiple times with different random seeds.
+* [OpenBox](https://github.com/PKU-DAIR/open-box): an open source system and service to efficiently solve generalized blackbox optimization problems.
 
-+ Run Nas-Bench-201. Please specify `${runtime_limit}` and `${dataset}`:
-```
-python test/autogluon_abohb/benchmark_autogluon_abohb_nasbench201.py --R 27 --reduction_factor 3 --brackets 4 --num_cpus 16 --n_workers 8 --timeout ${runtime_limit} --dataset ${dataset} --rep 1 --start_id 0
-```
+---------------------
+## **Related Publications**
+**Hyper-Tune: Towards Efficient Hyper-parameter Tuning at Scale**
+Yang Li, Yu Shen, Huaijun Jiang, Wetao Zhang, Jixiang Li, Ji Liu, Ce Zhang, Bin Cui
+To appear soon
 
-+ Run XGBoost. Please specify `${runtime_limit}` and `${dataset}`:
-```
-python test/autogluon_abohb/benchmark_autogluon_abohb_xgb.py --R 27 --reduction_factor 3 --brackets 4 --num_cpus 16 --n_workers 8 --n_jobs 16 --timeout ${runtime_limit} --dataset ${dataset} --rep 1 --start_id 0
-```
+**OpenBox: A Generalized Black-box Optimization Service**
+Yang Li, Yu Shen, Wentao Zhang, Yuanwei Chen, Huaijun Jiang, Mingchao Liu, Jiawei Jiang, Jinyang Gao, Wentao Wu, Zhi Yang, Ce Zhang, Bin Cui; ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD 2021).
+https://arxiv.org/abs/2106.00421
 
-+ Run LSTM:
-```
-python test/autogluon_abohb/benchmark_autogluon_abohb_lstm.py --R 27 --reduction_factor 3 --brackets 4 --num_gpus 1 --n_workers 4 --timeout 172800 --dataset penn --rep 1 --start_id 0
-```
+**MFES-HB: Efficient Hyperband with Multi-Fidelity Quality Measurements**
+Yang Li, Yu Shen, Jiawei Jiang, Jinyang Gao, Ce Zhang, Bin Cui; The Thirty-Fifth AAAI Conference on Artificial Intelligence (AAAI 2021).
+https://arxiv.org/abs/2012.03011
 
-+ Run ResNet:
-```
-python test/autogluon_abohb/benchmark_autogluon_abohb_resnet.py --R 27 --reduction_factor 3 --brackets 4 --num_gpus 1 --n_workers 4 --timeout 172800 --dataset cifar10 --rep 1 --start_id 0
-```
+## **License**
 
-+ Run noised Hartmann. Please specify `${noise_alpha}`:
-```
-python test/autogluon_abohb/benchmark_autogluon_abohb_math.py --R 27 --reduction_factor 3 --brackets 4 --num_cpus 16 --n_workers 8 --timeout 1080 --dataset hartmann --noise_alpha ${noise_alpha} --rep 1 --start_id 0
-```
-
+The entire codebase is under [MIT license](LICENSE).
