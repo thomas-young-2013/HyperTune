@@ -196,7 +196,10 @@ class mqBOHB_v2(mqHyperband):
         self.incumbent_configs.extend(T)
         self.incumbent_perfs.extend(val_losses)
         for config, perf in zip(T, val_losses):
-            observation = Observation(config, SUCCESS, None, [perf], None)
+            observation = Observation(
+                config=config, objs=[perf], constraints=None,
+                trial_state=SUCCESS, elapsed_time=None,
+            )
             self.history_container.update_observation(observation)
         self.logger.info('%d observations updated. %d incumbent configs total.' % (len(T), len(self.incumbent_configs)))
 

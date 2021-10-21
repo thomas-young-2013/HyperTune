@@ -93,8 +93,10 @@ class mqBO(mqBaseFacade):
         # update bo advisor
         for config, perf in zip(configs, val_losses):
             objs = [perf]
-            # config, trial_state, constraints, objs, elapsed_time
-            observation = Observation(config, SUCCESS, None, objs, None)
+            observation = Observation(
+                config=config, objs=objs, constraints=None,
+                trial_state=SUCCESS, elapsed_time=None,
+            )
             self.config_advisor.update_observation(observation)
             self.logger.info('update BO observation: config=%s, perf=%f' % (str(config), perf))
 
