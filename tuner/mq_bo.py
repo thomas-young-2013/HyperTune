@@ -40,9 +40,15 @@ class mqBO(mqBaseFacade):
         self.R = R
         self.n_workers = n_workers
         self.bo_init_num = bo_init_num
-        task_info = {'num_constraints': 0, 'num_objs': 1}
         # using median_imputation batch_strategy implemented in OpenBox to generate BO suggestions
-        self.config_advisor = SyncBatchAdvisor(config_space, task_info,
+        if 'task_info' in SyncBatchAdvisor.__init__.__code__.co_varnames:
+            # old version OpenBox
+            task_info = {'num_constraints': 0, 'num_objs': 1}
+            task_kwargs = dict(task_info=task_info)
+        else:
+            task_kwargs = dict(num_objs=1, num_constraints=0)
+        self.config_advisor = SyncBatchAdvisor(config_space,
+                                               **task_kwargs,
                                                batch_size=self.n_workers,
                                                batch_strategy='median_imputation',
                                                initial_trials=self.bo_init_num,
