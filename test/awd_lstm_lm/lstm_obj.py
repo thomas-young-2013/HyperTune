@@ -335,7 +335,7 @@ def get_path_by_config(config, is_dict=False):
 
 
 if __name__ == '__main__':
-    data_path = './test/awd-lstm-lm/data/penn'
+    data_path = './test/awd_lstm_lm/data/penn'
     cs = get_lstm_configspace()
     default_config = cs.get_default_configuration()
     corpus = get_corpus(data_path)

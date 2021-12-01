@@ -26,7 +26,7 @@ def evaluate_parallel(algo_class, algo_kwargs, method_id, n_workers, dataset, se
     print('ip=', ip, 'port=', port)
     assert parallel_strategy in ['sync', 'async']
 
-    data_path = './test/awd-lstm-lm/data/penn'
+    data_path = './test/awd_lstm_lm/data/penn'
     corpus = get_corpus(data_path)
 
     model_dir = os.path.join('./data/lstm_save_models', method_id)

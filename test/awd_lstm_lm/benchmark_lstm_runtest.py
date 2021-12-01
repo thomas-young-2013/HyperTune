@@ -65,7 +65,7 @@ runtime_limit = args.runtime_limit
 model = 'lstm'
 
 assert dataset == 'penn'
-data_path = './test/awd-lstm-lm/data/penn'
+data_path = './test/awd_lstm_lm/data/penn'
 corpus = get_corpus(data_path)
 
 try:
